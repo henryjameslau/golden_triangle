@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+</head>
+
+<body>
+  <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+  <script src='https://unpkg.com/d3@7.1.1/dist/d3.js'></script>
+
+  <script>
+
+    d3.json('./processed/east_midlands.geojson').then(function(EM){
+      d3.json('./data/grid.geojson').then(function(grid){
+        console.log(EM,grid)
+
+
+        grid.features.map(d => d.properties.band1 = +d.properties.band1)
+
+        centroids = grid.features.map(function(d,i) {
+          var point = turf.polygon(d.geometry.coordinates)
+          return turf.centroid(point)
+        })
+
+        centroids.forEach((item, i) => {
+          item.properties=grid.features[i].properties
+        });
+
+
+        console.log(centroids[0])
+
+        let totalPop = grid.features.reduce(function(prev, curr) {
+          return prev = (+prev) + (+curr.properties.band1)
+        }, 0)
+        console.log(totalPop)
+
+
+
+        // Loop through all the isochrones
+        var populationInIsochrone=0
+        // and then loop through all the points to see which centroids are in that isochrones
+        for (i = 0; i < centroids.length; i++) {
+          // add up the population along the way
+
+          if(turf.booleanContains(turf.feature(EM.features[0].geometry),turf.feature(centroids[i].geometry))){
+            populationInIsochrone=populationInIsochrone+centroids[i].properties.band1
+          }
+
+        }
+        EM.features[0].properties.population=populationInIsochrone
+        console.log(EM.features[0].properties.population)
+
+      })//close d3.json grid
+    })//close d3.json EM
+  </script>
+</body>
+
+</html>
