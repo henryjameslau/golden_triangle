@@ -41,3 +41,4 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 .ipynb_checkpoints/Analysis-checkpoint.ipynb
+.ipynb_checkpoints/Analysis-checkpoint.ipynb
