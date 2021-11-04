@@ -22,7 +22,7 @@ plot(st_geometry(region))
 # Source: Natural Earth
 # URL: https://www.naturalearthdata.com
 country <- ne_countries(country = 'united kingdom', type = 'map_units', scale = 'large', returnclass = 'sf') %>% 
-  filter(geounit == "Scotland") %>%
+  filter(geounit != "Northern Ireland") %>%
   st_transform(crs = 27700)
 
 plot(st_geometry(country))
@@ -37,10 +37,11 @@ grid <- readGDAL("data/UK_residential_population_2011_1_km.asc", p4s = '+init=EP
 centroids <- grid %>%
   st_transform(crs = 27700) %>% 
   st_centroid() %>% 
-  st_intersection(region) %>% ## intersect with region / country
+  st_intersection(country) %>% ## intersect with region / country
   mutate(grid_id = row_number()) %>% 
   select(grid_id, population = band1) %>% 
-  st_transform(crs = 4326) 
+  st_transform(crs = 4326) %>%
+  st_write('gb_centroid.geojson')
 
 plot(st_geometry(st_transform(region, 4326)))
 plot(st_geometry(centroids), add = T)
