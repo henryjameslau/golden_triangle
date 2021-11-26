@@ -14,7 +14,7 @@ library(osrm)
 # URL: https://geoportal.statistics.gov.uk/datasets/regions-december-2020-en-bgc
 region <- st_read("https://opendata.arcgis.com/datasets/cfa25518ddd7408a8da5c27eb42dd428_0.geojson") %>% 
   st_transform(27700) %>% 
-  filter(RGN20NM == "London")
+  filter(RGN20NM == "West Midlands")
 
 plot(st_geometry(region))
 
@@ -30,9 +30,17 @@ plot(st_geometry(country))
 # UK population (2011 Census, 1 km x 1 km grid)
 # Source: NERC Environmental Information Data Centre
 # URL: https://catalogue.ceh.ac.uk/documents/0995e94d-6d42-40c1-8ed4-5090d82471e1
+
 grid <- readGDAL("data/UK_residential_population_2011_1_km.asc", p4s = '+init=EPSG:4326') %>%
   st_as_stars() %>%
   st_as_sf(as_points = FALSE, merge = TRUE)
+
+wmgrid <- grid %>%
+  st_transform(crs = 27700) %>% 
+  st_intersection(region) %>%
+  mutate(grid_id = row_number()) %>% 
+  st_transform(crs = 4326) %>%
+  st_write('wm_grid.geojson')
 
 centroids <- grid %>%
   st_transform(crs = 27700) %>% 
